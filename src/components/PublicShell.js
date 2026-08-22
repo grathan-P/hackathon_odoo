@@ -6,7 +6,8 @@ import Footer from '@/components/Footer';
 
 export default function PublicShell({ children }) {
   const pathname = usePathname();
-  const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/hr/');
+  const employeeRoutes = ['/dashboard', '/profile', '/attendance', '/leave', '/payroll'];
+  const isDashboard = pathname.startsWith('/hr/') || employeeRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
   if (isDashboard) return children;
 

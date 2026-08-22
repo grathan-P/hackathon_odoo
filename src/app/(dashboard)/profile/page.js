@@ -1,44 +1,21 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { BriefcaseBusiness, Mail, MapPin, Phone, ShieldCheck, UserRound } from 'lucide-react';
+import { getMockSession } from '@/lib/mockAuth';
+import { initialEmployees, readMockCollection } from '@/lib/mockData';
+
+function Detail({ label, value, icon: Icon }) {
+  return <div className="flex gap-3 rounded-xl border border-gray-100 bg-gray-50/70 p-4"><Icon className="mt-0.5 h-4 w-4 shrink-0 text-[#5F3DC4]" /><div><dt className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{label}</dt><dd className="mt-1 text-sm font-semibold text-gray-800">{value || 'Not provided'}</dd></div></div>;
+}
+
 export default function ProfilePage() {
-  const profileDetails = [
-    { label: 'Full Name', value: 'Rahul Sharma' },
-    { label: 'Marital Status', value: 'Single' },
-    { label: 'Date of Birth', value: 'May 12, 1997' },
-    { label: 'Phone Number', value: '+91 98765 43210' },
-    { label: 'Gender', value: 'Male' },
-    { label: 'Alternate Email', value: 'rahul.s.personal@gmail.com' },
-    { label: 'Address', value: '221B Baker Street, Bengaluru, KA 560001' },
-    { label: 'Emergency Contact', value: 'Neha Sharma (Sister) - +91 91234 56789' },
-  ];
+  const [user, setUser] = useState(null);
+  const [employee, setEmployee] = useState(null);
+  useEffect(() => { const timeoutId = window.setTimeout(() => { const session = getMockSession(); setUser(session); const employees = readMockCollection('employees', initialEmployees); setEmployee(employees.find((item) => item.name === session?.fullName) || employees[0]); }, 0); return () => window.clearTimeout(timeoutId); }, []);
+  const name = user?.fullName || employee?.name || 'Employee';
+  const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2);
+  const details = [{ label: 'Email address', value: user?.email || employee?.email, icon: Mail }, { label: 'Phone number', value: user?.phone || employee?.phone, icon: Phone }, { label: 'Work location', value: 'Bengaluru, India', icon: MapPin }, { label: 'Employment status', value: employee?.status || 'Active', icon: ShieldCheck }];
 
-  return (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
-        <div className="w-24 h-24 rounded-full bg-purple-100 border-2 border-[#5F3DC4] flex items-center justify-center font-bold text-2xl text-[#5F3DC4]">
-          RS
-        </div>
-        <div className="space-y-1 text-center md:text-left flex-1">
-          <h3 className="text-xl font-bold text-gray-900">Rahul Sharma</h3>
-          <p className="text-xs text-gray-500 font-medium">Software Developer</p>
-          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-600 mt-2">Active</span>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-xs border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
-          <div><span className="text-gray-400 block">Employee ID</span><strong className="text-gray-800">EMP00123</strong></div>
-          <div><span className="text-gray-400 block">Department</span><strong className="text-gray-800">Engineering</strong></div>
-          <div><span className="text-gray-400 block">Date of Joining</span><strong className="text-gray-800">Jan 15, 2023</strong></div>
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
-        <h4 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3">Personal Information</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-xs">
-          {profileDetails.map((item, idx) => (
-            <div key={idx} className="flex justify-between border-b border-gray-50 pb-2">
-              <span className="text-gray-500">{item.label}</span>
-              <span className="font-semibold text-gray-800">{item.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="mx-auto max-w-5xl space-y-6"><div><p className="text-xs font-semibold uppercase tracking-wide text-[#5F3DC4]">Employee workspace</p><h2 className="mt-1 text-2xl font-bold text-gray-900">My profile</h2><p className="mt-1 text-xs text-gray-500">Your personal and employment information.</p></div><section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"><div className="h-28 bg-gradient-to-r from-[#5F3DC4] to-[#8b6ee8]" /><div className="-mt-12 flex flex-col gap-5 px-6 pb-6 sm:flex-row sm:items-end"><div className="flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-white bg-purple-100 text-2xl font-bold text-[#5F3DC4] shadow-sm">{initials}</div><div className="flex-1"><h3 className="text-xl font-bold text-gray-900">{name}</h3><p className="mt-1 text-sm text-gray-500">{employee?.role || 'Software Developer'} · {employee?.dept || 'Engineering'}</p></div><span className="inline-flex items-center gap-1.5 self-start rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:self-auto"><span className="h-2 w-2 rounded-full bg-emerald-500" />Active employee</span></div></section><div className="grid grid-cols-1 gap-6 lg:grid-cols-3"><section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2"><div className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4"><UserRound className="h-5 w-5 text-[#5F3DC4]" /><div><h3 className="text-sm font-bold text-gray-900">Personal details</h3><p className="text-xs text-gray-500">Contact information on file</p></div></div><dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">{details.map((detail) => <Detail key={detail.label} {...detail} />)}</dl></section><section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"><div className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4"><BriefcaseBusiness className="h-5 w-5 text-[#5F3DC4]" /><h3 className="text-sm font-bold text-gray-900">Employment details</h3></div><dl className="space-y-4 text-xs"><div><dt className="text-gray-400">Employee ID</dt><dd className="mt-1 font-bold text-gray-800">{employee?.id || user?.loginId || 'Pending'}</dd></div><div><dt className="text-gray-400">Department</dt><dd className="mt-1 font-semibold text-gray-800">{employee?.dept || 'Engineering'}</dd></div><div><dt className="text-gray-400">Designation</dt><dd className="mt-1 font-semibold text-gray-800">{employee?.role || 'Software Developer'}</dd></div><div><dt className="text-gray-400">Date of joining</dt><dd className="mt-1 font-semibold text-gray-800">Jan 15, 2023</dd></div></dl></section></div></div>;
 }
