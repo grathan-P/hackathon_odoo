@@ -4,7 +4,8 @@
     "email": "hr@dayflow.test",
     "password": "hr123",
     "role": "hr",
-    "phone": "9876543210"
+    "phone": "9876543210",
+    "companyName": "Odoo India"
   },
   {
     "fullName": "Rahul Sharma",
@@ -12,6 +13,7 @@
     "password": "employee123",
     "role": "employee",
     "phone": "9876543211",
-    "loginId": "RS20230001"
+    "loginId": "RS20230001",
+    "companyName": "Odoo India"
   }
 ]

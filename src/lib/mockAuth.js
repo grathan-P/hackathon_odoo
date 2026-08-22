@@ -19,12 +19,17 @@ export function registerMockUser(user) {
   const users = readUsers();
   const newUser = {
     ...user,
-    loginId: user.role === 'employee' ? createEmployeeLoginId(user.fullName) : undefined,
+    loginId: user.role === 'employee' ? user.loginId || createEmployeeLoginId(user.fullName, user.joiningYear) : undefined,
   };
   const updatedUsers = [...users, newUser];
 
   window.localStorage.setItem(USERS_KEY, JSON.stringify(updatedUsers));
   return newUser;
+}
+
+export function companyHasHr(companyName) {
+  const normalizedCompany = companyName.trim().toLowerCase();
+  return readUsers().some((user) => user.role === 'hr' && user.companyName?.trim().toLowerCase() === normalizedCompany);
 }
 
 export function authenticateMockUser(identifier, password) {

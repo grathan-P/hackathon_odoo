@@ -1,14 +1,14 @@
 const STORAGE_PREFIX = 'dayflow-mock-';
 
 export const initialEmployees = [
-  { id: 'OIRSHA20240001', name: 'Rahul Sharma', email: 'rahul@dayflow.test', dept: 'Engineering', role: 'Software Developer', status: 'Active', phone: '9876543211', joiningYear: 2024 },
-  { id: 'OISP20240002', name: 'Sneha Patil', email: 'sneha@dayflow.test', dept: 'Marketing', role: 'Marketing Executive', status: 'Active', phone: '9876543212', joiningYear: 2024 },
-  { id: 'OIAK20240003', name: 'Amit Kumar', email: 'amit@dayflow.test', dept: 'Engineering', role: 'UI/UX Designer', status: 'Active', phone: '9876543213', joiningYear: 2024 },
-  { id: 'OIVJ20230004', name: 'Vikram Joshi', email: 'vikram@dayflow.test', dept: 'Sales', role: 'Sales Executive', status: 'Active', phone: '9876543214', joiningYear: 2023 },
-  { id: 'OINS20230005', name: 'Neha Sharma', email: 'neha@dayflow.test', dept: 'HR', role: 'HR Executive', status: 'Active', phone: '9876543215', joiningYear: 2023 },
-  { id: 'OIRM20220006', name: 'Rohan Mehta', email: 'rohan@dayflow.test', dept: 'Finance', role: 'Accountant', status: 'Inactive', phone: '9876543216', joiningYear: 2022 },
-  { id: 'OIPS20250007', name: 'Pooja Singh', email: 'pooja@dayflow.test', dept: 'Engineering', role: 'QA Engineer', status: 'Active', phone: '9876543217', joiningYear: 2025 },
-  { id: 'OIIV20250008', name: 'Isha Verma', email: 'isha@dayflow.test', dept: 'Marketing', role: 'Content Writer', status: 'Active', phone: '9876543218', joiningYear: 2025 },
+  { id: 'OIRSHA20240001', name: 'Rahul Sharma', email: 'rahul@dayflow.test', dept: 'Engineering', role: 'Software Developer', status: 'Active', phone: '9876543211', joiningYear: 2024, companyName: 'Odoo India' },
+  { id: 'OISP20240002', name: 'Sneha Patil', email: 'sneha@dayflow.test', dept: 'Marketing', role: 'Marketing Executive', status: 'Active', phone: '9876543212', joiningYear: 2024, companyName: 'Odoo India' },
+  { id: 'OIAK20240003', name: 'Amit Kumar', email: 'amit@dayflow.test', dept: 'Engineering', role: 'UI/UX Designer', status: 'Active', phone: '9876543213', joiningYear: 2024, companyName: 'Odoo India' },
+  { id: 'OIVJ20230004', name: 'Vikram Joshi', email: 'vikram@dayflow.test', dept: 'Sales', role: 'Sales Executive', status: 'Active', phone: '9876543214', joiningYear: 2023, companyName: 'Odoo India' },
+  { id: 'OINS20230005', name: 'Neha Sharma', email: 'neha@dayflow.test', dept: 'HR', role: 'HR Executive', status: 'Active', phone: '9876543215', joiningYear: 2023, companyName: 'Odoo India' },
+  { id: 'OIRM20220006', name: 'Rohan Mehta', email: 'rohan@dayflow.test', dept: 'Finance', role: 'Accountant', status: 'Inactive', phone: '9876543216', joiningYear: 2022, companyName: 'Odoo India' },
+  { id: 'OIPS20250007', name: 'Pooja Singh', email: 'pooja@dayflow.test', dept: 'Engineering', role: 'QA Engineer', status: 'Active', phone: '9876543217', joiningYear: 2025, companyName: 'Odoo India' },
+  { id: 'OIIV20250008', name: 'Isha Verma', email: 'isha@dayflow.test', dept: 'Marketing', role: 'Content Writer', status: 'Active', phone: '9876543218', joiningYear: 2025, companyName: 'Odoo India' },
 ];
 
 export const initialAttendance = initialEmployees.slice(0, 6).map((employee, index) => ({
@@ -21,11 +21,11 @@ export const initialAttendance = initialEmployees.slice(0, 6).map((employee, ind
 }));
 
 export const initialLeaveRequests = [
-  { id: 'leave-1', employee: 'Amit Kumar', type: 'Casual Leave', dates: 'May 17 - May 19, 2024', days: 3, reason: 'Family Function', status: 'Pending' },
-  { id: 'leave-2', employee: 'Sneha Patil', type: 'Sick Leave', dates: 'May 20 - May 21, 2024', days: 2, reason: 'Not feeling well', status: 'Pending' },
-  { id: 'leave-3', employee: 'Vikram Joshi', type: 'Personal Leave', dates: 'May 18, 2024', days: 1, reason: 'Personal Work', status: 'Approved' },
-  { id: 'leave-4', employee: 'Neha Sharma', type: 'Casual Leave', dates: 'May 22 - May 24, 2024', days: 3, reason: 'Travel', status: 'Pending' },
-  { id: 'leave-5', employee: 'Rahul Sharma', type: 'Work From Home', dates: 'May 17, 2024', days: 1, reason: 'Doctor Appointment', status: 'Approved' },
+  { id: 'leave-1', employee: 'Amit Kumar', companyName: 'Odoo India', type: 'Casual Leave', dates: 'May 17 - May 19, 2024', days: 3, reason: 'Family Function', status: 'Pending' },
+  { id: 'leave-2', employee: 'Sneha Patil', companyName: 'Odoo India', type: 'Sick Leave', dates: 'May 20 - May 21, 2024', days: 2, reason: 'Not feeling well', status: 'Pending' },
+  { id: 'leave-3', employee: 'Vikram Joshi', companyName: 'Odoo India', type: 'Personal Leave', dates: 'May 18, 2024', days: 1, reason: 'Personal Work', status: 'Approved' },
+  { id: 'leave-4', employee: 'Neha Sharma', companyName: 'Odoo India', type: 'Casual Leave', dates: 'May 22 - May 24, 2024', days: 3, reason: 'Travel', status: 'Pending' },
+  { id: 'leave-5', employee: 'Rahul Sharma', companyName: 'Odoo India', type: 'Work From Home', dates: 'May 17, 2024', days: 1, reason: 'Doctor Appointment', status: 'Approved' },
 ];
 
 export const initialPendingRegistrations = [

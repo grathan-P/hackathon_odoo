@@ -1,90 +1,88 @@
--- Create custom types
-CREATE TYPE user_role AS ENUM ('employee', 'admin');
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TYPE user_role AS ENUM ('employee', 'hr');
 CREATE TYPE leave_status AS ENUM ('pending', 'approved', 'rejected');
-CREATE TYPE leave_type AS ENUM ('paid', 'sick', 'unpaid');
 CREATE TYPE attendance_status AS ENUM ('present', 'absent', 'half-day', 'leave');
 
--- 1. Profiles Table (Extends Supabase Auth)
+CREATE TABLE companies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  employee_id VARCHAR(50) UNIQUE NOT NULL, -- e.g. OIJODO20220001
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE RESTRICT,
+  employee_id VARCHAR(50) UNIQUE,
   full_name VARCHAR(255) NOT NULL,
-  role user_role DEFAULT 'employee',
-  email VARCHAR(255) UNIQUE NOT NULL,
+  role user_role NOT NULL DEFAULT 'employee',
+  email VARCHAR(255) NOT NULL UNIQUE,
   phone VARCHAR(50),
   address TEXT,
   job_title VARCHAR(100),
   department VARCHAR(100),
-  salary_structure JSONB DEFAULT '{}'::jsonb,
-  avatar_url TEXT,
-  requires_password_change BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  salary_structure JSONB NOT NULL DEFAULT '{}'::jsonb,
+  requires_password_change BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. Attendance Table
+CREATE UNIQUE INDEX one_hr_per_company ON profiles(company_id) WHERE role = 'hr';
+
 CREATE TABLE attendance (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  employee_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   date DATE NOT NULL DEFAULT CURRENT_DATE,
   check_in TIMESTAMPTZ,
   check_out TIMESTAMPTZ,
-  status attendance_status DEFAULT 'absent',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
+  status attendance_status NOT NULL DEFAULT 'absent',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(employee_id, date)
 );
 
--- 3. Leaves Table
-CREATE TABLE leaves (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  employee_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-  type leave_type NOT NULL,
+CREATE TABLE leave_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  hr_id UUID NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE RESTRICT,
+  leave_type VARCHAR(50) NOT NULL,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
-  status leave_status DEFAULT 'pending',
-  remarks TEXT,
-  admin_comments TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  days INTEGER NOT NULL CHECK (days > 0),
+  reason TEXT NOT NULL,
+  status leave_status NOT NULL DEFAULT 'pending',
+  hr_comments TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK (end_date >= start_date)
 );
 
--- Sequence for Employee ID Generation per year
--- We can handle the exact formatting in the backend/Edge functions or Application Logic.
--- We will generate the ID in the Next.js API route when creating the user.
+CREATE TABLE payroll_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE RESTRICT,
+  pay_period DATE NOT NULL,
+  gross_amount NUMERIC(12, 2) NOT NULL CHECK (gross_amount >= 0),
+  deductions NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (deductions >= 0),
+  net_amount NUMERIC(12, 2) GENERATED ALWAYS AS (gross_amount - deductions) STORED,
+  status VARCHAR(30) NOT NULL DEFAULT 'paid',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(employee_id, pay_period)
+);
 
--- Enable Row Level Security (RLS)
+ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
-ALTER TABLE leaves ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leave_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payroll_records ENABLE ROW LEVEL SECURITY;
 
--- Profiles RLS
-CREATE POLICY "Profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
--- Only service role (admin API) can insert profiles, or super admin. 
--- Since we are handling creation via Next.js server actions using Service Role key, we don't need an INSERT policy for normal users.
-CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
-
--- Attendance RLS
-CREATE POLICY "Users can view own attendance" ON attendance FOR SELECT USING (auth.uid() = employee_id);
--- Admins can view all attendance
-CREATE POLICY "Admins can view all attendance" ON attendance FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-CREATE POLICY "Users can insert own attendance" ON attendance FOR INSERT WITH CHECK (auth.uid() = employee_id);
-CREATE POLICY "Users can update own attendance" ON attendance FOR UPDATE USING (auth.uid() = employee_id);
-CREATE POLICY "Admins can update all attendance" ON attendance FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-
--- Leaves RLS
-CREATE POLICY "Users can view own leaves" ON leaves FOR SELECT USING (auth.uid() = employee_id);
-CREATE POLICY "Admins can view all leaves" ON leaves FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-CREATE POLICY "Users can insert own leaves" ON leaves FOR INSERT WITH CHECK (auth.uid() = employee_id);
-CREATE POLICY "Users can update own leaves" ON leaves FOR UPDATE USING (auth.uid() = employee_id);
-CREATE POLICY "Admins can update all leaves" ON leaves FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-
--- Function to handle new user signup from Supabase Auth (for the initial admin or if we decide to use triggers)
--- But since we are creating users manually via API, we'll let our API handle inserting into `profiles`.
+CREATE POLICY "Company members can view company" ON companies FOR SELECT USING (id IN (SELECT company_id FROM profiles WHERE id = auth.uid()));
+CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (id = auth.uid());
+CREATE POLICY "HR can view company profiles" ON profiles FOR SELECT USING (company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid() AND role = 'hr'));
+CREATE POLICY "Users can view own attendance" ON attendance FOR SELECT USING (employee_id = auth.uid());
+CREATE POLICY "HR can manage company attendance" ON attendance FOR ALL USING (employee_id IN (SELECT id FROM profiles WHERE company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid() AND role = 'hr')));
+CREATE POLICY "Employees can create own leave" ON leave_requests FOR INSERT WITH CHECK (employee_id = auth.uid());
+CREATE POLICY "Employees and HR can view leaves" ON leave_requests FOR SELECT USING (employee_id = auth.uid() OR hr_id = auth.uid());
+CREATE POLICY "HR can update company leaves" ON leave_requests FOR UPDATE USING (hr_id = auth.uid());
+CREATE POLICY "Employees can view own payroll" ON payroll_records FOR SELECT USING (employee_id = auth.uid());
+CREATE POLICY "HR can manage company payroll" ON payroll_records FOR ALL USING (company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid() AND role = 'hr'));

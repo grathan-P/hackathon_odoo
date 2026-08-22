@@ -1,46 +1,17 @@
-export default function AttendancePage() {
-  const records = [
-    { date: 'May 18, 2024', day: 'Sat', checkIn: '09:10 AM', checkOut: '06:05 PM', hours: '8h 55m', status: 'Present', location: 'Bengaluru' },
-    { date: 'May 17, 2024', day: 'Fri', checkIn: '09:05 AM', checkOut: '06:10 PM', hours: '9h 05m', status: 'Present', location: 'Bengaluru' },
-    { date: 'May 16, 2024', day: 'Thu', checkIn: '09:12 AM', checkOut: '06:00 PM', hours: '8h 48m', status: 'Present', location: 'Bengaluru' },
-    { date: 'May 14, 2024', day: 'Tue', checkIn: '--', checkOut: '--', hours: '--', status: 'Absent', location: '--' },
-  ];
+'use client';
 
-  return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-      <h3 className="text-lg font-bold text-gray-900">Attendance Log</h3>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="border-b border-gray-100 text-gray-400 font-semibold">
-              <th className="py-3 px-4">Date</th>
-              <th className="py-3 px-4">Day</th>
-              <th className="py-3 px-4">Check In</th>
-              <th className="py-3 px-4">Check Out</th>
-              <th className="py-3 px-4">Work Hours</th>
-              <th className="py-3 px-4">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50 text-gray-700">
-            {records.map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50/50">
-                <td className="py-3 px-4 font-medium text-gray-900">{row.date}</td>
-                <td className="py-3 px-4 text-gray-500">{row.day}</td>
-                <td className="py-3 px-4">{row.checkIn}</td>
-                <td className="py-3 px-4">{row.checkOut}</td>
-                <td className="py-3 px-4">{row.hours}</td>
-                <td className="py-3 px-4">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                    row.status === 'Present' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
-                  }`}>
-                    {row.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+import { useEffect, useState } from 'react';
+import { Download, Wallet } from 'lucide-react';
+import { getMockSession } from '@/lib/mockAuth';
+
+const payrollRows = [
+  { month: 'May 2024', gross: 'Rs 68,000', deductions: 'Rs 13,140', net: 'Rs 54,860', status: 'Paid' },
+  { month: 'April 2024', gross: 'Rs 68,000', deductions: 'Rs 13,140', net: 'Rs 54,860', status: 'Paid' },
+  { month: 'March 2024', gross: 'Rs 68,000', deductions: 'Rs 13,140', net: 'Rs 54,860', status: 'Paid' },
+];
+
+export default function PayrollPage() {
+  const [user, setUser] = useState(null);
+  useEffect(() => { const timeoutId = window.setTimeout(() => setUser(getMockSession()), 0); return () => window.clearTimeout(timeoutId); }, []);
+  return <div className="mx-auto max-w-5xl space-y-6"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-wide text-[#5F3DC4]">{user?.companyName || 'Company'} payroll</p><h2 className="mt-1 text-2xl font-bold text-gray-900">My payroll</h2><p className="mt-1 text-xs text-gray-500">Review your salary statements and payment history.</p></div><button className="flex items-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700"><Download className="h-4 w-4" /> Download latest</button></div><section className="grid grid-cols-1 gap-4 sm:grid-cols-3"><div className="rounded-2xl bg-[#5F3DC4] p-5 text-white shadow-sm sm:col-span-2"><Wallet className="h-5 w-5" /><p className="mt-5 text-xs text-purple-100">Latest take-home pay</p><h3 className="mt-1 text-3xl font-bold">Rs 54,860</h3><p className="mt-2 text-xs text-purple-100">May 2024 · Paid</p></div><div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"><p className="text-xs text-gray-500">Annual gross salary</p><h3 className="mt-3 text-2xl font-bold text-gray-900">Rs 8,16,000</h3><p className="mt-2 text-xs text-gray-400">As per current structure</p></div></section><section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"><h3 className="text-sm font-bold text-gray-900">Salary history</h3><div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs"><thead><tr className="border-b border-gray-100 text-gray-400"><th className="py-3 px-4">Month</th><th className="py-3 px-4">Gross pay</th><th className="py-3 px-4">Deductions</th><th className="py-3 px-4">Net pay</th><th className="py-3 px-4">Status</th></tr></thead><tbody className="divide-y divide-gray-50">{payrollRows.map((row) => <tr key={row.month}><td className="py-3 px-4 font-semibold text-gray-800">{row.month}</td><td className="py-3 px-4">{row.gross}</td><td className="py-3 px-4">{row.deductions}</td><td className="py-3 px-4 font-semibold">{row.net}</td><td className="py-3 px-4"><span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">{row.status}</span></td></tr>)}</tbody></table></div></section></div>;
 }

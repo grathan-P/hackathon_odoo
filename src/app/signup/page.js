@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Mail, Phone, Lock, Eye, EyeOff, UserCheck } from 'lucide-react';
-import { registerMockUser } from '@/lib/mockAuth';
+import { User, Mail, Phone, Lock, Eye, EyeOff, UserCheck, Building2 } from 'lucide-react';
+import { companyHasHr, registerMockUser } from '@/lib/mockAuth';
 import { initialPendingRegistrations, readMockCollection, writeMockCollection } from '@/lib/mockData';
 
 export default function SignUpPage() {
@@ -12,6 +12,7 @@ export default function SignUpPage() {
     fullName: '',
     email: '',
     phone: '',
+    companyName: '',
     role: 'employee',
     password: '',
     confirmPassword: '',
@@ -28,12 +29,16 @@ export default function SignUpPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.fullName || !formData.email || !formData.companyName || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all required fields.');
       return;
     }
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match!');
+      return;
+    }
+    if (formData.role === 'hr' && companyHasHr(formData.companyName)) {
+      setError('This company already has an HR account. Only one HR is allowed per company.');
       return;
     }
 
@@ -44,6 +49,8 @@ export default function SignUpPage() {
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
+        companyName: formData.companyName,
+        password: formData.password,
         role: 'Employee',
         dept: 'Unassigned',
         joiningYear: new Date().getFullYear(),
@@ -161,6 +168,14 @@ export default function SignUpPage() {
                     <option value="hr">HR</option>
                   </select>
                 </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Company Name</label>
+              <div className="relative">
+                <Building2 className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
+                <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} placeholder="Enter your company name" className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none" />
               </div>
             </div>
 
