@@ -1,0 +1,17 @@
+[
+  {
+    "fullName": "Priya Verma",
+    "email": "hr@dayflow.test",
+    "password": "hr123",
+    "role": "hr",
+    "phone": "9876543210"
+  },
+  {
+    "fullName": "Rahul Sharma",
+    "email": "rahul@dayflow.test",
+    "password": "employee123",
+    "role": "employee",
+    "phone": "9876543211",
+    "loginId": "RS20230001"
+  }
+]

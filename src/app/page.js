@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { authenticateMockUser } from '@/lib/mockAuth';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -22,12 +22,14 @@ export default function SignInPage() {
       setError('Please fill in all required fields.');
       return;
     }
-    
-    // Backend API logic will go here
-    console.log('Login Successful:', formData);
 
-    // Redirect user after successful sign-in
-    // router.push('/dashboard'); 
+    const user = authenticateMockUser(formData.email, formData.password);
+    if (!user) {
+      setError('Invalid email, login ID, or password.');
+      return;
+    }
+
+    router.push(user.role === 'hr' ? '/hr/dashboard' : '/dashboard');
   };
 
   return (

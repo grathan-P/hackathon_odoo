@@ -1,13 +1,13 @@
-import Sidebar from '@/components/Sidebar';
-import Navbar2 from '@/components/Navbar2';
+import Sidebar2 from '@/components/Sidebar2';
+import Navbar3 from '@/components/Navbar3';
 import Footer from '@/components/Footer';
 
-export default function DashboardLayout({ children }) {
+export default function HRDashboardLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]">
-      <Sidebar />
+      <Sidebar2 />
       <div className="flex-1 flex flex-col">
-        <Navbar2 />
+        <Navbar3 />
         <main className="flex-1 p-8 overflow-y-auto">{children}</main>
         <Footer />
       </div>

@@ -1,8 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Search, Bell, ChevronDown, Menu } from 'lucide-react';
+import { getMockSession } from '@/lib/mockAuth';
 
 export default function Navbar2() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setUser(getMockSession()), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
   return (
     <header className="h-16 bg-white border-b border-gray-100 px-8 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-4 flex-1 max-w-md">
@@ -32,7 +41,7 @@ export default function Navbar2() {
             RS
           </div>
           <div className="text-left hidden sm:block">
-            <h4 className="text-xs font-bold text-gray-800 leading-none">Rahul Sharma</h4>
+            <h4 className="text-xs font-bold text-gray-800 leading-none">{user?.fullName || 'Employee'}</h4>
             <span className="text-[10px] text-gray-500 font-medium">Employee</span>
           </div>
           <ChevronDown className="w-4 h-4 text-gray-400" />

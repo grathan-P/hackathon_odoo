@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Mail, Phone, Lock, Eye, EyeOff, UserCheck } from 'lucide-react';
+import { registerMockUser } from '@/lib/mockAuth';
+import { initialPendingRegistrations, readMockCollection, writeMockCollection } from '@/lib/mockData';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [registeredUser, setRegisteredUser] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,11 +37,24 @@ export default function SignUpPage() {
       return;
     }
 
-    // Backend API logic will go here
-    console.log('Signup Successful:', formData);
+    if (formData.role === 'employee') {
+      const pending = readMockCollection('pending-registrations', initialPendingRegistrations);
+      writeMockCollection('pending-registrations', [...pending, {
+        id: `registration-${Date.now()}`,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        role: 'Employee',
+        dept: 'Unassigned',
+        joiningYear: new Date().getFullYear(),
+        status: 'Pending',
+      }]);
+      setRegisteredUser({ role: 'pending' });
+      return;
+    }
 
-    // Redirect to Sign In page upon successful signup
-    router.push('/');
+    const user = registerMockUser(formData);
+    setRegisteredUser(user);
   };
 
   return (
@@ -65,6 +81,15 @@ export default function SignUpPage() {
         <div className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100 max-w-md w-full mx-auto">
           <h3 className="text-2xl font-bold text-gray-900 mb-1">Sign Up</h3>
           <p className="text-xs text-gray-500 mb-6">Create a new account</p>
+
+          {registeredUser && (
+            <div className="mb-4 p-3 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100">
+              {registeredUser.role === 'pending' ? 'Registration submitted. HR approval is required before you can sign in.' : `Account created. Sign in with ${registeredUser.role === 'employee' ? `login ID ${registeredUser.loginId}` : 'your email'}.`}
+              <button type="button" onClick={() => router.push('/')} className="block mt-2 font-semibold underline">
+                Continue to Sign In
+              </button>
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-xs font-medium border border-red-100">
@@ -192,6 +217,13 @@ export default function SignUpPage() {
               Sign Up
             </button>
           </form>
+
+          {formData.role === 'employee' && (
+            <div className="mt-6 rounded-xl border border-purple-100 bg-purple-50 p-3">
+              <img src="/images/login.avif" alt="Employee account preview" className="w-full h-32 object-contain" />
+              <p className="mt-2 text-center text-[11px] font-medium text-purple-700">Employee login ID will be generated after registration.</p>
+            </div>
+          )}
 
           {/* Sign In Redirect Link */}
           <p className="mt-6 text-center text-xs text-gray-600">
