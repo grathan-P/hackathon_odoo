@@ -1,18 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+#### Install packages
 
-First, run the development server:
+```sh
+npm install
+```
+
+#### Configure Supabase
+
+Copy `.env.example` to `.env.local` and replace the placeholder values with your Supabase project URL and publishable key:
+
+```sh
+copy .env.example .env.local
+```
+
+Keep `.env.local` private and do not commit it.
+
+#### Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+
+---
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
