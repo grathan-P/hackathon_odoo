@@ -1,69 +1,150 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+
+export default function SignInPage() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError('');
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.email || !formData.password) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    
+    // Backend API logic will go here
+    console.log('Login Successful:', formData);
+
+    // Redirect user after successful sign-in
+    // router.push('/dashboard'); 
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        {/* Left Side: Info & Illustration */}
+        <div className="space-y-6">
+          <h2 className="text-4xl font-bold text-gray-900">
+            Welcome <span className="text-[#6D36F6]">Back!</span> 👋
+          </h2>
+          <p className="text-gray-600 text-sm">
+            Sign in to continue to your Dayflow account
+          </p>
+
+          <ul className="space-y-3 pt-2">
+            {[
+              'Smart Attendance Tracking',
+              'Leave Management Made Easy',
+              'Secure Payroll Management',
+              'Role-based Access Control',
+            ].map((feature, idx) => (
+              <li key={idx} className="flex items-center gap-3 text-sm text-gray-700 font-medium">
+                <CheckCircle2 className="w-5 h-5 text-[#6D36F6]" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+
+          <div className="pt-4 flex justify-center lg:justify-start">
+            <img
+              src="/images/login.avif"
+              alt="Login Graphic"
+              className="w-full max-w-sm h-auto object-contain"
+            />
+          </div>
+        </div>
+
+        {/* Right Side: Sign In Form Box */}
+        <div className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100 max-w-md w-full mx-auto">
+          <h3 className="text-2xl font-bold text-gray-900 mb-1">Sign In</h3>
+          <p className="text-xs text-gray-500 mb-6">Enter your credentials to access your account</p>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-xs font-medium border border-red-100">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Email or Login ID
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email or login ID"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6D36F6]/20 focus:border-[#6D36F6] outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-gray-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6D36F6]/20 focus:border-[#6D36F6] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <a href="#" className="text-xs font-medium text-[#6D36F6] hover:underline">
+                Forgot Password?
+              </a>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#6D36F6] hover:bg-[#5F3DC4] text-white py-3 rounded-xl font-semibold text-sm transition shadow-sm"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Sign In
+            </button>
+          </form>
+
+          {/* Sign Up Redirect Link */}
+          <p className="mt-6 text-center text-xs text-gray-600">
+            Don&apos;t have an account?{' '}
+            <button
+              type="button"
+              onClick={() => router.push('/signup')}
+              className="text-[#6D36F6] font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
             >
-              Learning
-            </a>{" "}
-            center.
+              Sign Up
+            </button>
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
